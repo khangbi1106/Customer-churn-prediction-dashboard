@@ -1,0 +1,48 @@
+import pandas as pd
+
+# Load CSV file
+df = pd.read_csv("Telco-Customer-Churn.csv")
+
+# Show first 5 rows
+print(df.head())
+
+# Check data types and missing values
+print(df.info())
+print(df.isnull().sum())
+
+# Example: Convert 'TotalCharges' to numeric
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+
+# Drop rows with missing TotalCharges
+df = df.dropna(subset=['TotalCharges'])
+
+# Encode categorical variables if needed later
+df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.countplot(data=df, x='Churn')
+plt.title("Churn Distribution")
+plt.show()
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+
+# Select features and target
+X = df.drop(['customerID', 'Churn'], axis=1)
+X = pd.get_dummies(X)  # One-hot encoding for categorical
+y = df['Churn']
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a model
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
